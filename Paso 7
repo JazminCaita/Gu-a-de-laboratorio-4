@@ -1,0 +1,57 @@
+load("heart_data.mat")
+%%
+%DIAS 
+Edad = heart_data.age;
+heart_data.age=heart_data.age/365;
+
+%% 
+%FUMADOR
+N=size(heart_data, 1);
+smokeCat = strings(N,1);
+for f=1:N
+    if heart_data.smoke(f) == 1
+        smokeCat(f) = "Fumador";
+    elseif heart_data.smoke(f) ~=1
+        smokeCat(f) = "No fumador";
+    end
+end
+heart_data.fumador = smokeCat;
+
+%% 
+%ALCOHOLICO
+N=size(heart_data, 1);
+alcoCat = strings(N,1);
+for f=1:N
+    if heart_data.alco(f) == 1
+        alcoCat(f) = "Alcoholico";
+    elseif heart_data.alco(f) ~=1
+        alcoCat(f) = "No alcoholico";
+    end
+end
+heart_data.alcoholico = alcoCat;
+
+%% 
+%ACTIVIDAD FISICA
+N=size(heart_data, 1);
+activeCat = strings(N,1);
+for f=1:N
+   if heart_data.active(f) == 1
+        activeCat(f) = "Hace actividad fisica";
+    elseif heart_data.active(f) ~=1
+        activeCat(f) = "No hace actividad fisica";
+    end
+end
+heart_data.actividad = activeCat;
+
+%% 
+%CARDIO
+N=size(heart_data, 1);
+cardioCat = strings(N,1);
+for f=1:N
+   if heart_data.cardio(f) == 1
+        cardioCat(f) = "Cardio";
+    elseif heart_data.cardio(f) ~=1
+        cardioCat(f) = "No cardio";
+    end
+end
+heart_data.enfermedad = cardioCat;
