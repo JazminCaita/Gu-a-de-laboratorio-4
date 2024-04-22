@@ -1,0 +1,50 @@
+load("heart_data.mat");
+%%
+%a)DIAS POR AÑOS
+edad = heart_data.age;
+heart_data.age=(heart_data.age)/365;
+edad=heart_data.age; 
+
+%%
+% Paso extra para punto C:cambiar cm a m
+Altura =heart_data.height;
+heart_data.height=(heart_data.height)/100;
+Altura=heart_data.height;
+
+%%
+% C)Calcula el índice de masa corporal para cada individuo
+
+N = size (heart_data,1);
+IMC= zeros (N,1);
+
+ClasificacionIMC=strings (N,1); %vector  vacio 
+for i=1:N
+    IMC(i)= (heart_data.weight(i))/((heart_data.height(i))^2);
+    
+    if (IMC(i)<18.5)
+        ClasificacionIMC(i)="Peso bajo";
+
+    elseif (18.5<=IMC(i) && 24.9>=IMC(i))
+        ClasificacionIMC(i)="Peso normal";
+
+    elseif (25<=IMC(i) && 30>=IMC(i))
+        ClasificacionIMC(i)="Sobre peso";
+
+    else 
+        ClasificacionIMC(i)="Obeso";
+    end
+end
+heart_data.IMC=IMC;
+heart_data.ClasificacionIMC=ClasificacionIMC;
+
+%%
+% D)Calcula la presión arterial media 
+
+N = size (heart_data,1);
+PresionMedia= zeros (N,1);
+
+for j=1:N
+    PresionMedia(j) =(((heart_data.ap_hi(j))+((heart_data.ap_lo(j))*2))/3);
+end
+
+heart_data.PresionMedia=PresionMedia;
