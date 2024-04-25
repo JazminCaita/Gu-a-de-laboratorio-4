@@ -1,0 +1,46 @@
+% Cargar la base de datos
+load census
+
+% Extraer la variable POPULATION
+population = census.POPULATION;
+
+% Extraer la variable AGE
+age = census.AGE;
+
+% Definir los grados polinomiales
+grados = [1 2 3];
+
+% Ajustar y evaluar polinomios para cada grado
+for grado_actual = grados
+    % Ajustar el polinomio
+    p = polyfit(age, population, grado_actual);
+
+    % Evaluar el polinomio en el rango de edad
+    age_eval = linspace(min(age), max(age), 1000);
+    population_eval = polyval(p, age_eval);
+
+    % Guardar los coeficientes del polinomio
+    coeficientes{grado_actual} = p;
+
+    % Almacenar la población evaluada
+    poblacion_evaluada{grado_actual} = population_eval;
+end
+
+% Crear la figura
+figure;
+
+% Gráfica de dispersión de los datos
+plot(age, population, 'o', 'MarkerSize', 4);
+
+% Agregar curvas de ajuste polinomial
+hold on;
+for grado_actual = grados
+    plot(age_eval, poblacion_evaluada{grado_actual}, '-', 'LineWidth', 2);
+end
+
+% Personalizar la gráfica
+title('Ajuste polinomial de la población por edad');
+xlabel('Edad');
+ylabel('Población');
+grid on;
+legend(['Datos', 'Ajuste polinomial grado 1', 'Ajuste polinomial grado 2', 'Ajuste polinomial grado 3']);
