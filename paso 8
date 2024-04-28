@@ -1,0 +1,223 @@
+classdef paso8 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                     matlab.ui.Figure
+        BusquedadeBasedeDatosLabel   matlab.ui.control.Label
+        IMC                          matlab.ui.control.EditField
+        FumadorLabel_4               matlab.ui.control.Label
+        Actividad_fisica             matlab.ui.control.EditField
+        FumadorLabel_3               matlab.ui.control.Label
+        cardiocaja                   matlab.ui.control.EditField
+        TieneenfermedadescardiovascularesLabel  matlab.ui.control.Label
+        alcohol                      matlab.ui.control.EditField
+        FumadorLabel_2               matlab.ui.control.Label
+        fumador                      matlab.ui.control.EditField
+        FumadorLabel                 matlab.ui.control.Label
+        CalcularIMC                  matlab.ui.control.Button
+        ID                           matlab.ui.control.NumericEditField
+        IDdelpacienteEditFieldLabel  matlab.ui.control.Label
+    end
+
+
+    properties (Access = public)
+        HeartData
+    end
+    
+    methods (Access = private)
+        
+        function Preprocesamiento(app)
+            app.HeartData.height = app.HeartData.height / 100;
+        end
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: CalcularIMC
+        function CalcularIMCButtonPushed(app, event)
+   load("HeartData.mat", "heart_data_Copia");
+app.HeartData = heart_data_Copia;
+id = app.ID.Value;
+
+peso = app.HeartData.weight(id);
+altura = app.HeartData.height(id);
+imc = peso/(altura/100)^2;
+if imc < 18.5
+    categoria_imc = "Bajo peso";
+elseif imc >= 18.5 && imc < 25
+    categoria_imc = "Normal";
+elseif imc >= 25 && imc < 30
+    categoria_imc = "Sobrepeso";
+else
+    categoria_imc = "Obeso";
+end
+
+
+alcohol = app.HeartData.alco(id);
+if alcohol == 0
+    estado_bebe = "No bebe alcohol";
+elseif alcohol == 1
+    estado_bebe = "bebe alcohol";
+else
+    estado_bebe = "Valor no válido";
+end
+
+fumador = app.HeartData.smoke(id);
+if fumador == 0
+    estado_fumador = "No fuma";
+elseif fumador == 1
+    estado_fumador = "Fuma";
+else
+    estado_fumador = "Valor no válido";
+end
+
+cardio = app.HeartData.cardio(id);
+if cardio == 0
+    estado_enfermo = "No tiene enferemerdades cardiovasculares";
+elseif cardio == 1
+    estado_enfermo = "Tiene enferemerdades cardiovasculares";
+else
+    estado_enfermo = "Valor no válido";
+end
+
+Actividad = app.HeartData.active(id);
+if Actividad == 0
+    estado_fisico = "No hace actividades fisicas";
+elseif Actividad == 1
+    estado_fisico = "hace actividades fisicas";
+else
+    estado_fisico = "Valor no válido";
+end
+
+app.IMC.Value = categoria_imc; % Actualiza el valor del NumericEditField
+app.alcohol.Value = estado_bebe; % Actualiza el valor del NumericEditField
+app.fumador.Value = estado_fumador; % Actualiza el valor del NumericEditField
+app.cardiocaja.Value = estado_enfermo; % Actualiza el valor del NumericEditField
+app.Actividad_fisica.Value = estado_fisico; % Actualiza el valor del NumericEditField
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 597 390];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create IDdelpacienteEditFieldLabel
+            app.IDdelpacienteEditFieldLabel = uilabel(app.UIFigure);
+            app.IDdelpacienteEditFieldLabel.HorizontalAlignment = 'right';
+            app.IDdelpacienteEditFieldLabel.Position = [260 298 82 22];
+            app.IDdelpacienteEditFieldLabel.Text = 'ID del paciente';
+
+            % Create ID
+            app.ID = uieditfield(app.UIFigure, 'numeric');
+            app.ID.Limits = [1 70000];
+            app.ID.ValueDisplayFormat = '%.0f';
+            app.ID.Position = [248 277 100 22];
+            app.ID.Value = 1;
+
+            % Create CalcularIMC
+            app.CalcularIMC = uibutton(app.UIFigure, 'push');
+            app.CalcularIMC.ButtonPushedFcn = createCallbackFcn(app, @CalcularIMCButtonPushed, true);
+            app.CalcularIMC.Position = [249 232 100 23];
+            app.CalcularIMC.Text = 'Calcular IMC';
+
+            % Create FumadorLabel
+            app.FumadorLabel = uilabel(app.UIFigure);
+            app.FumadorLabel.HorizontalAlignment = 'right';
+            app.FumadorLabel.Position = [419 192 56 22];
+            app.FumadorLabel.Text = 'Fumador:';
+
+            % Create fumador
+            app.fumador = uieditfield(app.UIFigure, 'text');
+            app.fumador.Editable = 'off';
+            app.fumador.Position = [359 163 176 22];
+
+            % Create FumadorLabel_2
+            app.FumadorLabel_2 = uilabel(app.UIFigure);
+            app.FumadorLabel_2.HorizontalAlignment = 'right';
+            app.FumadorLabel_2.Position = [131 123 78 22];
+            app.FumadorLabel_2.Text = 'Bebe Alcohol:';
+
+            % Create alcohol
+            app.alcohol = uieditfield(app.UIFigure, 'text');
+            app.alcohol.Editable = 'off';
+            app.alcohol.Position = [82 94 176 22];
+
+            % Create TieneenfermedadescardiovascularesLabel
+            app.TieneenfermedadescardiovascularesLabel = uilabel(app.UIFigure);
+            app.TieneenfermedadescardiovascularesLabel.HorizontalAlignment = 'right';
+            app.TieneenfermedadescardiovascularesLabel.Position = [52 192 216 22];
+            app.TieneenfermedadescardiovascularesLabel.Text = 'Tiene enfermedades cardiovasculares :';
+
+            % Create cardiocaja
+            app.cardiocaja = uieditfield(app.UIFigure, 'text');
+            app.cardiocaja.Editable = 'off';
+            app.cardiocaja.Position = [82 163 176 22];
+
+            % Create FumadorLabel_3
+            app.FumadorLabel_3 = uilabel(app.UIFigure);
+            app.FumadorLabel_3.HorizontalAlignment = 'right';
+            app.FumadorLabel_3.Position = [403 123 88 22];
+            app.FumadorLabel_3.Text = 'Actividad física:';
+
+            % Create Actividad_fisica
+            app.Actividad_fisica = uieditfield(app.UIFigure, 'text');
+            app.Actividad_fisica.Editable = 'off';
+            app.Actividad_fisica.Position = [359 94 176 22];
+
+            % Create FumadorLabel_4
+            app.FumadorLabel_4 = uilabel(app.UIFigure);
+            app.FumadorLabel_4.HorizontalAlignment = 'right';
+            app.FumadorLabel_4.Position = [288 64 27 22];
+            app.FumadorLabel_4.Text = 'IMC';
+
+            % Create IMC
+            app.IMC = uieditfield(app.UIFigure, 'text');
+            app.IMC.Editable = 'off';
+            app.IMC.Position = [214 35 176 22];
+
+            % Create BusquedadeBasedeDatosLabel
+            app.BusquedadeBasedeDatosLabel = uilabel(app.UIFigure);
+            app.BusquedadeBasedeDatosLabel.FontName = 'Impact';
+            app.BusquedadeBasedeDatosLabel.FontSize = 24;
+            app.BusquedadeBasedeDatosLabel.Position = [159 319 284 72];
+            app.BusquedadeBasedeDatosLabel.Text = 'Busqueda de Base de Datos :';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = paso8
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
