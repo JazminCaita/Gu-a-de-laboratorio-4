@@ -1,0 +1,223 @@
+classdef punto456 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                      matlab.ui.Figure
+        DropdownPanel                 matlab.ui.container.Panel
+        Button                        matlab.ui.control.Button
+        GrupodeopcionesDropDown       matlab.ui.control.DropDown
+        GrupodeopcionesDropDownLabel  matlab.ui.control.Label
+        UIAxes2                       matlab.ui.control.UIAxes
+        UIAxes                        matlab.ui.control.UIAxes
+    end
+
+    %Declaracion de heart data
+    properties (Access = public)
+        HeartData % Description
+    end
+    methods (Access = private)
+        
+  
+            function Preprocesamiento(app)
+            app.HeartData.age=app.HeartData.age/365;
+            app.HeartData.height=app.HeartData.height/100;
+
+           id=app.ID.Value;
+           %calcular el IMC
+            peso=app.HeartData.weight(id);
+            altura=app.HeartData.height(id);
+            imc=peso/altura^2;
+            
+%Calcular la presion arterial por medio de presion arterial distolica y
+%sistolica.
+            distolica=app.HeartData.ap_hi(id);
+            sistolica=app.HeartData.ap_lo(id);
+            pres_Art=(2*distolica+sistolica)/3;
+           
+      
+            end
+   
+        
+       
+            
+       
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Code that executes after component creation
+        function startupFcn(app)
+           % Llamo a heart data
+            load("heart_data.mat", "heart_data");
+            app.HeartData=heart_data;
+            Preprocesmiento(app);
+        
+        end
+
+        % Value changed function: GrupodeopcionesDropDown
+        function GrupodeopcionesDropDownValueChanged(app, event)
+        value=app.GrupodeopcionesDropDown.Value;
+        end
+
+        % Button pushed function: Button
+        function ButtonPushed(app, event)
+            %Condicional para que haga algo depedndiendo de la opcion que
+            %elija en el listado
+            if value == 2
+                %Contadores para hacer mi grafica de barras
+                 contadorM_35_55=0;
+                 contadorH_35_55=0;
+                 cont_mujeres_56_76 = 0;
+                 cont_hombres_56_76 = 0;
+                 cont_mujeres_77_mas = 0;
+                 cont_hombres_77_mas = 0;
+%Bucle para que cuente cuantas personas estan enfermas segun su genero y
+%rango de edad
+                 for i=1:70000
+                     %Condicional para dividir entre los que estan enfermos
+                     %y los qye no
+                     if heart_data.cardio(i)==1
+                         if heart_data.age(i)>=35 && heart_data.age(i)<=55
+                             %Condicionales para dividir entre los rangos
+                             %de edad
+                             if heart_data.gender==1
+                                 %Condicional para dividir entre si es
+                                 %hombre o muje, tambien teniendo en cuenta
+                                 %su rango de edad
+                                 contadorM_35_55=contadorM_35_55+1;
+                             else 
+                                 contadorH_35_55=contadorH_35_55+1;
+                             end
+                         elseif heart_data.age(i)>=56 && heart_data.age(i)<=76
+                             if heart_data.gender==1
+                                 cont_mujeres_56_76=cont_mujeres_56_76+1;
+                             else 
+                                 cont_hombres_56_76=cont_hombres_56_76+1;
+                             end
+                           elseif heart_data.age(i)>=77
+                             if heart_data.gender==1
+                                 cont_mujeres_77_mas=cont_mujeres_77_mas+1;
+                             else 
+                                 cont_hombres_77_mas=cont_hombres_77_mas+1;
+                             end
+                         end
+                     end
+                 end
+        x = 1:3; % Posiciones de las barras en el eje x. Son 3 posciones de las barras
+        %Muho ira en el eje Y, y elevara las barras dependiendo de cuant
+        %haya contado los contadores del buble for.
+
+        muho = [contadorM_35_55 contadorH_35_55; cont_mujeres_56_76 cont_hombres_56_76; cont_mujeres_77_mas,cont_hombres_77_mas];
+        bar(app.UIAxes, x, muho); %Bar es una funcion que me ayuda a hacer graficas de barras. Primero se le dice en
+        %donde se va graficar, luego cual sera el eje x y por ultimo
+        %nuestro eje Y.
+      
+        %Ttitulos para la grafica y los ejes
+        app.UIAxes.Title.String = 'Personas con enfermedades cardiovasculares';
+        app.UIAxes.XLabel.String = 'Rangos de edades';
+        app.UIAxes.YLabel.String = 'Cantidad de personas enfermas';
+%Me pondra los rangos en cada posicion del eje x
+        app.UIAxes.XTickLabel = {'35-55', '56-76', '77-mas'};
+        
+          %En caso que se escoja el punto 6 (3)   
+    elseif value == 3
+        gscatter(app.UIAxes,imc,app.HeartData.cholesterol,app.HeartData.cardio);
+        app.UIAxes.Title.String = 'IMC';
+        app.UIAxes.XLabel.String = 'Colesterol';
+        app.UIAxes.YLabel.String = 'Índice de masa corporal vs Colesterol';
+
+        gscatter(app.UIAxes2,app.HeartData.gluc,pres_Art,app.HeartData.cardio);
+        app.UIAxes2.Title.String = 'Glucosa';
+        app.UIAxes2.XLabel.String = 'Presion arterial';
+        app.UIAxes2.YLabel.String = 'Nivel de glucosa vs Presión arterial media';
+             
+             end
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create DropdownPanel
+            app.DropdownPanel = uipanel(app.UIFigure);
+            app.DropdownPanel.Title = 'Drop down';
+            app.DropdownPanel.Position = [40 10 573 426];
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.DropdownPanel);
+            title(app.UIAxes, 'Title')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.Position = [257 211 300 185];
+
+            % Create UIAxes2
+            app.UIAxes2 = uiaxes(app.DropdownPanel);
+            title(app.UIAxes2, 'Title')
+            xlabel(app.UIAxes2, 'X')
+            ylabel(app.UIAxes2, 'Y')
+            zlabel(app.UIAxes2, 'Z')
+            app.UIAxes2.Position = [257 10 300 185];
+
+            % Create GrupodeopcionesDropDownLabel
+            app.GrupodeopcionesDropDownLabel = uilabel(app.DropdownPanel);
+            app.GrupodeopcionesDropDownLabel.HorizontalAlignment = 'right';
+            app.GrupodeopcionesDropDownLabel.Position = [18 356 106 22];
+            app.GrupodeopcionesDropDownLabel.Text = 'Grupo de opciones';
+
+            % Create GrupodeopcionesDropDown
+            app.GrupodeopcionesDropDown = uidropdown(app.DropdownPanel);
+            app.GrupodeopcionesDropDown.Items = {'Opcion', 'Punto 5', 'Punto 6'};
+            app.GrupodeopcionesDropDown.ItemsData = [1 2 3];
+            app.GrupodeopcionesDropDown.ValueChangedFcn = createCallbackFcn(app, @GrupodeopcionesDropDownValueChanged, true);
+            app.GrupodeopcionesDropDown.Position = [139 356 100 22];
+            app.GrupodeopcionesDropDown.Value = 1;
+
+            % Create Button
+            app.Button = uibutton(app.DropdownPanel, 'push');
+            app.Button.ButtonPushedFcn = createCallbackFcn(app, @ButtonPushed, true);
+            app.Button.Position = [21 293 100 22];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = punto456
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
