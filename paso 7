@@ -1,0 +1,193 @@
+classdef paso7 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure         matlab.ui.Figure
+        COL              matlab.ui.control.Button
+        PAM              matlab.ui.control.Button
+        IMC              matlab.ui.control.Button
+        desviacion       matlab.ui.control.NumericEditField
+        desviacionLabel  matlab.ui.control.Label
+        media            matlab.ui.control.NumericEditField
+        mediaLabel       matlab.ui.control.Label
+        RESPUESTA        matlab.ui.control.EditField
+        NoEnfermoButton  matlab.ui.control.Button
+        EnfermoButton    matlab.ui.control.Button
+    end
+
+    
+     properties (Access = public)
+        HeartData
+    end
+    
+    methods (Access = private)
+        
+        function Preprocesamiento(app)
+            app.HeartData.height = app.HeartData.height / 100;
+        end
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: EnfermoButton
+        function EnfermoButtonPushed(app, event)
+            load("HeartData.mat", "heart_data_Copia");
+             app.HeartData = heart_data_Copia;
+            
+            % Filtrar los datos para obtener solo los pacientes enfermos
+            datos_enfermos = app.HeartData(app.HeartData.cardio == 1, :);
+            
+            % Calcular y mostrar los valores medios según el botón seleccionado
+            if app.IMC.Value
+                data_mean = mean(datos_enfermos.Weight ./ (datos_enfermos.Height .^ 2));
+            elseif app.PAM.Value
+                data_mean = mean(datos_enfermos.Ap_hi);
+            elseif app.COL.Value
+                data_mean = mean(datos_enfermos.Cholesterol);
+            end
+            
+            % Calcular y mostrar la desviación estándar según el botón seleccionado
+            if app.IMC.Value
+                data_std = std(datos_enfermos.Weight ./ (datos_enfermos.Height .^ 2));
+            elseif app.PAM.Value
+                data_std = std(datos_enfermos.Ap_hi);
+            elseif app.COL.Value
+                data_std = std(datos_enfermos.Cholesterol);
+            end
+            
+            % Actualizar las cajas de media y desviación
+            app.media.Value = data_mean;
+            app.desviacion.Value = data_std;
+            
+            app.RESPUESTA.Value = "Enfermo";
+        end
+
+        % Button pushed function: NoEnfermoButton
+        function NoEnfermoButtonPushed(app, event)
+             load("HeartData.mat", "heart_data_Copia");
+              app.HeartData = heart_data_Copia;
+            % Filtrar los datos para obtener solo los pacientes no enfermos
+            datos_no_enfermos = app.HeartData(app.HeartData.cardio == 0, :);
+            
+            % Calcular y mostrar los valores medios según el botón seleccionado
+            if app.IMC.Value
+                data_mean = mean(datos_no_enfermos.Weight ./ (datos_no_enfermos.Height .^ 2));
+            elseif app.PAM.Value
+                data_mean = mean(datos_no_enfermos.Ap_hi);
+            elseif app.COL.Value
+                data_mean = mean(datos_no_enfermos.Cholesterol);;
+            end
+            
+            % Calcular y mostrar la desviación estándar según el botón seleccionado
+            if app.IMC.Value
+                data_std = std(datos_no_enfermos.Weight ./ (datos_no_enfermos.Height .^ 2));
+            elseif app.PAM.Value
+                data_std = std(datos_no_enfermos.Ap_hi);
+            elseif app.COL.Value
+                data_std = std(datos_no_enfermos.Cholesterol);
+            end
+            
+            % Actualizar las cajas de media y desviación
+            app.media.Value = data_mean;
+            app.desviacion.Value = data_std;
+            
+            app.RESPUESTA.Value = "No Enfermo";
+        
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create EnfermoButton
+            app.EnfermoButton = uibutton(app.UIFigure, 'push');
+            app.EnfermoButton.ButtonPushedFcn = createCallbackFcn(app, @EnfermoButtonPushed, true);
+            app.EnfermoButton.Position = [172 382 100 22];
+            app.EnfermoButton.Text = 'Enfermo';
+
+            % Create NoEnfermoButton
+            app.NoEnfermoButton = uibutton(app.UIFigure, 'push');
+            app.NoEnfermoButton.ButtonPushedFcn = createCallbackFcn(app, @NoEnfermoButtonPushed, true);
+            app.NoEnfermoButton.Position = [370 382 100 22];
+            app.NoEnfermoButton.Text = 'No Enfermo';
+
+            % Create RESPUESTA
+            app.RESPUESTA = uieditfield(app.UIFigure, 'text');
+            app.RESPUESTA.Editable = 'off';
+            app.RESPUESTA.Position = [271 353 100 22];
+
+            % Create mediaLabel
+            app.mediaLabel = uilabel(app.UIFigure);
+            app.mediaLabel.HorizontalAlignment = 'right';
+            app.mediaLabel.Position = [203 205 38 22];
+            app.mediaLabel.Text = 'media';
+
+            % Create media
+            app.media = uieditfield(app.UIFigure, 'numeric');
+            app.media.Position = [172 184 100 22];
+
+            % Create desviacionLabel
+            app.desviacionLabel = uilabel(app.UIFigure);
+            app.desviacionLabel.HorizontalAlignment = 'right';
+            app.desviacionLabel.Position = [385 205 62 22];
+            app.desviacionLabel.Text = 'desviación';
+
+            % Create desviacion
+            app.desviacion = uieditfield(app.UIFigure, 'numeric');
+            app.desviacion.Position = [370 184 100 22];
+
+            % Create IMC
+            app.IMC = uibutton(app.UIFigure, 'push');
+            app.IMC.Position = [172 291 100 22];
+            app.IMC.Text = 'IMC';
+
+            % Create PAM
+            app.PAM = uibutton(app.UIFigure, 'push');
+            app.PAM.Position = [271 270 100 22];
+            app.PAM.Text = 'PAM';
+
+            % Create COL
+            app.COL = uibutton(app.UIFigure, 'push');
+            app.COL.Position = [370 291 100 22];
+            app.COL.Text = 'C';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = paso7
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
